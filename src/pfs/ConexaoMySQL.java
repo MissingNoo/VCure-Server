@@ -1,8 +1,11 @@
 package pfs;
+import org.json.JSONObject;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class ConexaoMySQL {
@@ -101,6 +104,24 @@ public class ConexaoMySQL {
             System.out.println(ex);
         }
         return nickname;
+    }
+
+    public static void submit_score(User user, JSONObject scoredata) {
+        try {
+            String query = "INSERT INTO leaderboards (playerid, score, build, time)"
+                    + "VALUES (?, ?, ?, ?)";
+            PreparedStatement preparedStmt = connection.prepareStatement(query);
+            preparedStmt.setInt (1, user.playerid);
+            preparedStmt.setString (2, scoredata.getBigDecimal("score").toString());
+            preparedStmt.setString (3, scoredata.getString("build"));
+            preparedStmt.setString (4, scoredata.getString("date"));
+            preparedStmt.execute();
+            System.out.println("New score received from " + user.playername);
+        }
+        catch (SQLException err) {
+            System.err.println("Got an exception!");
+            System.err.println(err.getMessage());
+        }
     }
 
     public static String loadinfo(String usr, String date, String moment) {

@@ -12,7 +12,8 @@ public class Server {
     enum Contype {
         Null,
         Register,
-        Login
+        Login,
+        ScoreSubmit
     }
 
     public static List<User> clients;
@@ -63,7 +64,7 @@ public class Server {
         }
     }
 
-    public void removeClient(User user) {
+    public static void removeClient(User user) {
         clients.remove(user);
     }
 
@@ -77,6 +78,7 @@ public class Server {
             bout.write(buf);
             bout.flush();
         } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 

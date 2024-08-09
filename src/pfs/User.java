@@ -7,17 +7,14 @@ import java.time.LocalDateTime;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
+@SuppressWarnings("unused")
 public class User implements Runnable {
-
     public SocketChannel channel;
     private boolean connected = true;
     private Server server;
-    private String playername = "";
-    private int playerid = 0;
-    private int idd = 0;
-
-    ByteBuffer wBuffer = ByteBuffer.allocate(4096);
+    public String playername = "";
+    public int playerid;
+    private int idd;
 
     public User(Server server, SocketChannel channel, int idd) {
         this.server = server;
@@ -31,15 +28,22 @@ public class User implements Runnable {
             ByteBuffer buffer;
             try {
                 buffer = ByteBuffer.allocate(1024);
-                @SuppressWarnings("unused")
                 var read = channel.read(buffer);
                 if (buffer.hasArray()) {
                     String data = new String(buffer.array(), Charset.defaultCharset());
                     try {
-                        JSONObject json = new JSONObject("{type : 99}");
-                        //Check if valid JSON received
-                        if (data.charAt(0) == '{') { json = new JSONObject(data); }
+                        JSONObject json;
                         JSONObject senddata = new JSONObject();
+                        try {
+                            json = new JSONObject(data);
+                        }
+                        catch (JSONException err){
+                            json = new JSONObject("{type : 99, playername : \"-1\", playerid : \"-1\"}");
+                        }
+                        if (!json.get("playername").toString().equals(playername) && !playername.isEmpty()) {
+                            Server.removeClient(this);
+                            throw new RuntimeException("Invalid Credentials");
+                        }
                         switch (getMessageContype(Integer.parseInt(json.get("type").toString()))) {
                             case Register:
                                 System.out.println(getTimeStamp() + "Register packet received!!!");
@@ -59,6 +63,9 @@ public class User implements Runnable {
                                     senddata.put("login", false);
                                     senddata.put("reason", "Invalid credentials");
                                 }
+                                break;
+                            case ScoreSubmit:
+                                ConexaoMySQL.submit_score(this, json);
                                 break;
                             /*case Load:
                             	System.out.println(getTimeStamp() + "Login packet received");
@@ -81,11 +88,13 @@ public class User implements Runnable {
                                 break;
                         }
                         if (senddata.optInt("type") != 0) {
-                            System.out.println(getTimeStamp() + "Sending: " + senddata.toString());
+                            System.out.println(getTimeStamp() + "Sending: " + senddata);
                             Server.sendData(this, senddata.toString());
                         }
-                    }catch (JSONException err){
-                        //System.out.println(err.toString());
+                    }catch (RuntimeException r) {
+                        break;
+                    }catch (Exception err){
+                        System.out.println(err.toString());
                     }
                 }
             } catch (IOException ex) {
@@ -103,17 +112,12 @@ public class User implements Runnable {
     }
 
     private Server.Contype getMessageContype(int type){
-        Server.Contype r = Server.Contype.Null;
-        switch (type) {
-            case 0: r = Server.Contype.Null; break;
-            case 1: r = Server.Contype.Register; break;
-            case 2: r = Server.Contype.Login; break;
-            //case 1: r = Server.Contype.Join; break;
-            //case 3: r = Server.Contype.Login; break;
-            //case 4: r = Server.Contype.Load; break;
-            //case 5: r = Server.Contype.Save; break;
-        }
-        return r;
+        return switch (type) {
+            default -> Server.Contype.Null;
+            case 1 -> Server.Contype.Register;
+            case 2 -> Server.Contype.Login;
+            case 3 -> Server.Contype.ScoreSubmit;
+        };
     }
 
     private String getTimeStamp(){
