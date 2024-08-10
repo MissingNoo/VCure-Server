@@ -15,6 +15,7 @@ public class User implements Runnable {
     public String playername = "";
     public int playerid;
     private int idd;
+    public boolean is_host = false;
 
     public User(Server server, SocketChannel channel, int idd) {
         this.server = server;
@@ -67,6 +68,35 @@ public class User implements Runnable {
                             case ScoreSubmit:
                                 ConexaoMySQL.submit_score(this, json);
                                 break;
+                            case CreateLobby:
+                                System.out.println("Create Received");
+                                try {
+                                    Server.createLobby(this, json.getString("name"), json.getString("password"));
+                                }
+                                catch (Exception e) {
+                                    System.out.println(e.getMessage());
+                                }
+
+                                break;
+                            case JoinLobby:
+                                System.out.println("JoinLobby Received");
+                                try {
+                                    Server.joinLobby(this, json.getString("name"), json.getString("password"));
+                                }
+                                catch (Exception e) {
+                                    System.out.println(e.getMessage());
+                                }
+                                break;
+                            case ListLobbies:
+                                System.out.println("ListLobbies Received");
+                                try {
+                                    Server.listLobbies(this);
+                                }
+                                catch (Exception e) {
+                                    System.out.println(e.getMessage());
+                                }
+
+                                break;
                             /*case Load:
                             	System.out.println(getTimeStamp() + "Login packet received");
                                 username = json.get("usr").toString();
@@ -89,7 +119,7 @@ public class User implements Runnable {
                         }
                         if (senddata.optInt("type") != 0) {
                             System.out.println(getTimeStamp() + "Sending: " + senddata);
-                            Server.sendData(this, senddata.toString());
+                            Server.sendData(this, senddata);
                         }
                     }catch (RuntimeException r) {
                         break;
@@ -117,6 +147,9 @@ public class User implements Runnable {
             case 1 -> Server.Contype.Register;
             case 2 -> Server.Contype.Login;
             case 3 -> Server.Contype.ScoreSubmit;
+            case 4 -> Server.Contype.CreateLobby;
+            case 5 -> Server.Contype.JoinLobby;
+            case 6 -> Server.Contype.ListLobbies;
         };
     }
 

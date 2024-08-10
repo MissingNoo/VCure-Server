@@ -123,37 +123,4 @@ public class ConexaoMySQL {
             System.err.println(err.getMessage());
         }
     }
-
-    public static String loadinfo(String usr, String date, String moment) {
-        String result = "\"result\" : \"not found\",";
-        String hour = "0";
-        String minute = "0";
-        String query = "SELECT * FROM `hours` WHERE `account` = " + usr + " AND `date` LIKE '" + date + "' AND `moment` = " + moment;
-        //System.out.println("Q:" + query);
-        try (Statement stmt = connection.createStatement()) {
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                hour = rs.getString("hour").toString();
-                minute = rs.getString("minute").toString();
-                result = "\"result\" : \"found\", \"hour\" : \"" + hour + "\", \"minute\" : \"" + minute + "\",";
-                //System.out.println(result);
-            }
-        }
-        catch (SQLException ex){
-            System.out.println(ex);
-        }
-        return result;
-    }
-
-    public static void savehours(String usr, String hour, String minute, String date, String moment, User user) {
-        String query = "INSERT INTO `hours` (`account`, `hour`, `minute`, `date`, `moment`) VALUES ('" + usr + "', '" + hour + "', '" + minute + "', '" + date +"', '" + moment+ "')";
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute(query);
-            System.out.println("User " + usr + " registered hours!");
-            Server.sendData(user, "{\"type\" : \"5\"}");
-        }
-        catch (SQLException ex){
-            System.out.println(ex);
-        }
-    }
 }

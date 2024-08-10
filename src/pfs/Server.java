@@ -1,4 +1,6 @@
 package pfs;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.*;
 import java.nio.channels.ServerSocketChannel;
@@ -13,16 +15,21 @@ public class Server {
         Null,
         Register,
         Login,
-        ScoreSubmit
+        ScoreSubmit,
+        CreateLobby,
+        JoinLobby,
+        ListLobbies
     }
 
     public static List<User> clients;
+    public static List<Lobby> lobbies;
     private ServerSocketChannel socket;
     private boolean running;
     private int lastid;
 
     public Server(int port) {
         Server.clients = new ArrayList<User>();
+        Server.lobbies = new ArrayList<Lobby>();
         this.running = false;
 
         System.out.print(getTimeStamp() + "[Server] Trying to Listen on Port : " + port + "...");
@@ -68,9 +75,9 @@ public class Server {
         clients.remove(user);
     }
 
-    public static void sendData(User user, String data){
+    public static void sendData(User user, JSONObject json){
         try {
-            data = data + ";";
+            String data = json.toString() + ";";
             OutputStream out = user.channel.socket().getOutputStream();
             BufferedOutputStream bout = new BufferedOutputStream(out);
             byte buf[] = data.getBytes();
@@ -78,6 +85,47 @@ public class Server {
             bout.write(buf);
             bout.flush();
         } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void createLobby(User owner, String name, String password) {
+        Lobby l = new Lobby(name, password);
+        l.addPlayer(owner);
+        lobbies.add(l);
+    }
+
+    public static void joinLobby(User user, String name, String password) {
+        for (Lobby lobby : lobbies) {
+            try {
+                System.out.println("Lobby " + lobby.name + " : " + name + " : " + lobby.name.equals(name));
+                if (lobby.name.equals(name)) {
+                    lobby.addPlayer(user);
+                    break;
+                }
+            }
+            catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+        }
+    }
+
+    public static void listLobbies(User user) {
+        try {
+            List<String> lobbyList = new ArrayList<String>();
+            for (Lobby lobby : lobbies) {
+                JSONObject lobbyinfo = new JSONObject();
+                lobbyinfo.put("name", lobby.name);
+                lobbyinfo.put("totalplayers", lobby.players.size());
+                lobbyList.add(lobbyinfo.toString());
+            }
+            JSONObject data = new JSONObject();
+            data.put("type", 6);
+            data.put("lobbies", lobbyList.toString());
+            sendData(user, data);
+        }
+        catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
