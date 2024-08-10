@@ -53,7 +53,7 @@ public class Server {
             // If a connection is found, create a User and add it to
             // the client list
             if (newChannel != null) {
-                System.out.println("New Connection " + newChannel.socket().getInetAddress().toString());
+                System.out.println(getTimeStamp() + "New Connection " + newChannel.socket().getInetAddress().toString());
                 User c = new User(this, newChannel);
                 Thread t = new Thread(c);
                 t.start();

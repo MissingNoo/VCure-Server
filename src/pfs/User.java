@@ -45,13 +45,13 @@ public class User implements Runnable {
                         switch (getMessageContype(Integer.parseInt(json.get("type").toString()))) {
                             case Register:
                                 String id = ConexaoMySQL.register(json.get("playername").toString());
-                                senddata.put("type", 1);
+                                senddata.put("type", Server.Contype.Register.ordinal());
                                 senddata.put("id", id);
                                 break;
                             case Login:
                                 String dbname = ConexaoMySQL.login(json.getInt("playerid"));
                                 senddata.put("type", Server.Contype.Login.ordinal());
-                                if (json.getString("playername").compareTo(dbname) == 0) {
+                                if (json.getString("playername").equals(dbname)) {
                                     senddata.put("login", true);
                                     playername = dbname;
                                     playerid = json.getInt("playerid");
@@ -77,7 +77,7 @@ public class User implements Runnable {
                                 break;
                         }
                         if (senddata.optInt("type") != 0) {
-                            System.out.println(getTimeStamp() + "Sending: " + senddata);
+                            //System.out.println(Server.getTimeStamp() + "Sending: " + senddata);
                             Server.sendData(this, senddata);
                         }
                     }catch (RuntimeException r) {
@@ -110,9 +110,5 @@ public class User implements Runnable {
             case 5 -> Server.Contype.JoinLobby;
             case 6 -> Server.Contype.ListLobbies;
         };
-    }
-
-    private String getTimeStamp(){
-        return LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute() + ":" + LocalDateTime.now().getSecond()  + "> ";
     }
 }
