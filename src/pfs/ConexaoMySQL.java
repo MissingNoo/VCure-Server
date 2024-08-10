@@ -106,7 +106,7 @@ public class ConexaoMySQL {
         return nickname;
     }
 
-    public static void submit_score(User user, JSONObject scoredata) {
+    public static void submitScore(User user, JSONObject scoredata) {
         try {
             String query = "INSERT INTO leaderboards (playerid, score, build, time)"
                     + "VALUES (?, ?, ?, ?)";

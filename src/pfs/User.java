@@ -66,36 +66,16 @@ public class User implements Runnable {
                                 }
                                 break;
                             case ScoreSubmit:
-                                ConexaoMySQL.submit_score(this, json);
+                                ConexaoMySQL.submitScore(this, json);
                                 break;
                             case CreateLobby:
-                                System.out.println("Create Received");
-                                try {
-                                    Server.createLobby(this, json.getString("name"), json.getString("password"));
-                                }
-                                catch (Exception e) {
-                                    System.out.println(e.getMessage());
-                                }
-
+                                Server.createLobby(this, json.getString("name"), json.getString("password"));
                                 break;
                             case JoinLobby:
-                                System.out.println("JoinLobby Received");
-                                try {
-                                    Server.joinLobby(this, json.getString("name"), json.getString("password"));
-                                }
-                                catch (Exception e) {
-                                    System.out.println(e.getMessage());
-                                }
+                                Server.joinLobby(this, json.getString("name"), json.getString("password"));
                                 break;
                             case ListLobbies:
-                                System.out.println("ListLobbies Received");
-                                try {
-                                    Server.listLobbies(this);
-                                }
-                                catch (Exception e) {
-                                    System.out.println(e.getMessage());
-                                }
-
+                                Server.listLobbies(this);
                                 break;
                             /*case Load:
                             	System.out.println(getTimeStamp() + "Login packet received");
