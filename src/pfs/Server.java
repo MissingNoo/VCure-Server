@@ -23,16 +23,14 @@ public class Server {
 
     public static List<User> clients;
     public static List<Lobby> lobbies;
-    private ServerSocketChannel socket;
-    private boolean running;
-    private int lastid;
 
     public Server(int port) {
-        Server.clients = new ArrayList<User>();
-        Server.lobbies = new ArrayList<Lobby>();
-        this.running = false;
+        Server.clients = new ArrayList<>();
+        Server.lobbies = new ArrayList<>();
+        boolean running = false;
 
         System.out.print(getTimeStamp() + "[Server] Trying to Listen on Port : " + port + "...");
+        ServerSocketChannel socket;
         try {
             ServerSocketChannel channel = ServerSocketChannel.open();
             channel.socket().bind(new java.net.InetSocketAddress(port));
@@ -43,31 +41,26 @@ public class Server {
         } catch (IOException e) {
             System.err.println("Failed!");
             socket = null;
-            running = false;
         }
 
         // Server loop
-        while (running) {
-            try {
-                // Sleep the thread
-                Thread.sleep(1);
-                // Check for new connections
-                SocketChannel newChannel = socket.accept();
-                // If a connection is found, create a User and add it to
-                // the client list
-                if (newChannel != null) {
-                    System.out.println("New Connection " + newChannel.socket().getInetAddress().toString());
-                    ++lastid;
-                    User c = new User(this, newChannel, lastid);
-                    Thread t = new Thread(c);
-                    t.start();
-                    clients.add(c);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+        //noinspection LoopConditionNotUpdatedInsideLoop
+        while (running) try {
+            // Sleep the thread
+            Thread.sleep(1);
+            // Check for new connections
+            SocketChannel newChannel = socket.accept();
+            // If a connection is found, create a User and add it to
+            // the client list
+            if (newChannel != null) {
+                System.out.println("New Connection " + newChannel.socket().getInetAddress().toString());
+                User c = new User(this, newChannel);
+                Thread t = new Thread(c);
+                t.start();
+                clients.add(c);
             }
+        } catch (InterruptedException | IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -80,7 +73,7 @@ public class Server {
             String data = json.toString() + ";";
             OutputStream out = user.channel.socket().getOutputStream();
             BufferedOutputStream bout = new BufferedOutputStream(out);
-            byte buf[] = data.getBytes();
+            byte[] buf = data.getBytes();
             bout.flush();
             bout.write(buf);
             bout.flush();
@@ -97,37 +90,27 @@ public class Server {
 
     public static void joinLobby(User user, String name, String password) {
         for (Lobby lobby : lobbies) {
-            try {
-                System.out.println("Lobby " + lobby.name + " : " + name + " : " + lobby.name.equals(name));
-                if (lobby.name.equals(name)) {
-                    lobby.addPlayer(user);
-                    break;
-                }
+            if (lobby.name.equals(name)) {
+                user.lobby = lobby;
+                lobby.addPlayer(user);
+                break;
             }
-            catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-
         }
     }
 
     public static void listLobbies(User user) {
-        try {
-            List<String> lobbyList = new ArrayList<String>();
-            for (Lobby lobby : lobbies) {
-                JSONObject lobbyinfo = new JSONObject();
-                lobbyinfo.put("name", lobby.name);
-                lobbyinfo.put("totalplayers", lobby.players.size());
-                lobbyList.add(lobbyinfo.toString());
-            }
-            JSONObject data = new JSONObject();
-            data.put("type", 6);
-            data.put("lobbies", lobbyList.toString());
-            sendData(user, data);
+        List<String> lobbyList = new ArrayList<>();
+        for (Lobby lobby : lobbies) {
+            JSONObject lobbyinfo = new JSONObject();
+            lobbyinfo.put("name", lobby.name);
+            lobbyinfo.put("protected", lobby.password.isEmpty());
+            lobbyinfo.put("totalplayers", lobby.players.size());
+            lobbyList.add(lobbyinfo.toString());
         }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        JSONObject data = new JSONObject();
+        data.put("type", 6);
+        data.put("lobbies", lobbyList.toString());
+        sendData(user, data);
     }
 
     public static String getTimeStamp(){
@@ -136,15 +119,15 @@ public class Server {
         int second = LocalDateTime.now().getSecond();
         String hourstring = String.valueOf(hour);
         if (hour < 9) {
-            hourstring = "0" + String.valueOf(hour);
+            hourstring = "0" + hour;
         }
         String minutestring = String.valueOf(minute);
         if (minute < 9) {
-            minutestring = "0" + String.valueOf(minute);
+            minutestring = "0" + minute;
         }
         String secondstring = String.valueOf(second);
         if (second < 9) {
-            secondstring = "0" + String.valueOf(second);
+            secondstring = "0" + second;
         }
         return "[" + hourstring + ":" + minutestring + ":" + secondstring + "] ";
     }
@@ -155,6 +138,7 @@ public class Server {
         }
         ConexaoMySQL.getConexaoMySQL();
         System.out.println(ConexaoMySQL.statusConection());
+        //noinspection InstantiationOfUtilityClass
         new Server(21319);
     }
 

@@ -1,5 +1,6 @@
 package pfs;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ public class Lobby {
     public List<User> players = new ArrayList<>();
     public String name;
     public String password;
-    public int totalplayers = 0;
 
     public Lobby(String name, String password) {
         System.out.println("New Lobby: " + name);
@@ -37,8 +37,7 @@ public class Lobby {
                 senddata.put("players", Arrays.toString(playerdata));
                 Server.sendData(player, senddata);
             }
-        }
-        catch (Exception e) {
+        } catch (JSONException e) {
             System.out.println(e.getMessage());
         }
     }

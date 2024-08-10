@@ -11,16 +11,13 @@ import org.json.JSONObject;
 public class User implements Runnable {
     public SocketChannel channel;
     private boolean connected = true;
-    private Server server;
     public String playername = "";
     public int playerid;
-    private int idd;
     public boolean is_host = false;
+    public Lobby lobby;
 
-    public User(Server server, SocketChannel channel, int idd) {
-        this.server = server;
+    public User(Server server, SocketChannel channel) {
         this.channel = channel;
-        this.idd = idd;
     }
 
     @Override
@@ -47,14 +44,13 @@ public class User implements Runnable {
                         }
                         switch (getMessageContype(Integer.parseInt(json.get("type").toString()))) {
                             case Register:
-                                System.out.println(getTimeStamp() + "Register packet received!!!");
                                 String id = ConexaoMySQL.register(json.get("playername").toString());
                                 senddata.put("type", 1);
                                 senddata.put("id", id);
                                 break;
                             case Login:
                                 String dbname = ConexaoMySQL.login(json.getInt("playerid"));
-                                senddata.put("type", 2);
+                                senddata.put("type", Server.Contype.Login.ordinal());
                                 if (json.getString("playername").compareTo(dbname) == 0) {
                                     senddata.put("login", true);
                                     playername = dbname;
@@ -77,23 +73,6 @@ public class User implements Runnable {
                             case ListLobbies:
                                 Server.listLobbies(this);
                                 break;
-                            /*case Load:
-                            	System.out.println(getTimeStamp() + "Login packet received");
-                                username = json.get("usr").toString();
-                                String date = json.get("date").toString();
-                                String moment = json.get("moment").toString();
-                                String result = ConexaoMySQL.loadinfo(username, date, moment);
-                                server.sendData(this, "{\"type\" : \"4\", " + result + "}");
-                                break;
-                            case Save:
-                            	System.out.println(getTimeStamp() + "Hour register packet received");
-                            	String usr = json.get("usr").toString();
-                            	String hour = json.get("hour").toString();
-                            	String minute = json.get("minute").toString();
-                            	date = json.get("date").toString();
-                            	moment = json.get("moment").toString();
-                            	ConexaoMySQL.savehours(usr, hour, minute, date, moment, this);
-                            	break;*/
                             default:
                                 break;
                         }
@@ -104,18 +83,18 @@ public class User implements Runnable {
                     }catch (RuntimeException r) {
                         break;
                     }catch (Exception err){
-                        System.out.println(err.toString());
+                        System.out.println(err.getMessage());
                     }
                 }
             } catch (IOException ex) {
                 //ex.printStackTrace();
                 System.out.println(channel.socket().getInetAddress().toString() + " has disconnected.");
                 connected = false;
-                server.removeClient(this);
+                Server.removeClient(this);
                 try {
                     channel.close();
                 } catch (IOException ex1) {
-                    ex1.printStackTrace();
+                    System.out.println(ex1.getMessage()); //ex1.printStackTrace();
                 }
             }
         }
