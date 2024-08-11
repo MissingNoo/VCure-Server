@@ -13,13 +13,14 @@ public class Lobby {
     public String password;
 
     public Lobby(String name, String password) {
-        System.out.println("New Lobby: " + name);
+        System.out.println(Server.getTimeStamp() + "New Lobby: " + name);
         this.name = name;
         this.password = password;
     }
 
     public void addPlayer(User user) {
-        System.out.println("Adding player " + user.playername + " to lobby " + this.name);
+        System.out.println(Server.getTimeStamp() + user.playername + " joined " + name);
+        user.lobby = this;
         JSONObject senddata = new JSONObject();
         try {
             user.is_host = players.isEmpty();
@@ -43,6 +44,11 @@ public class Lobby {
     }
 
     public void delPlayer(User user) {
+        System.out.println(Server.getTimeStamp() + user.playername + " left " + name);
         players.remove(user);
+        if (players.isEmpty()) {
+            System.out.println(Server.getTimeStamp() + "Removing lobby " + name + " as it is empty");
+            Server.delLobby(this);
+        }
     }
 }

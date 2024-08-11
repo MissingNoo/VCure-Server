@@ -18,7 +18,8 @@ public class Server {
         ScoreSubmit,
         CreateLobby,
         JoinLobby,
-        ListLobbies
+        ListLobbies,
+        Disconnect
     }
 
     public static List<User> clients;
@@ -65,6 +66,7 @@ public class Server {
     }
 
     public static void removeClient(User user) {
+        if (user.lobby != null) user.lobby.delPlayer(user);
         clients.remove(user);
     }
 
@@ -88,6 +90,10 @@ public class Server {
         lobbies.add(l);
     }
 
+    public static void delLobby(Lobby lobby) {
+        lobbies.remove(lobby);
+    }
+
     public static void joinLobby(User user, String name, String password) {
         for (Lobby lobby : lobbies) {
             if (lobby.name.equals(name)) {
@@ -108,7 +114,7 @@ public class Server {
             lobbyList.add(lobbyinfo.toString());
         }
         JSONObject data = new JSONObject();
-        data.put("type", 6);
+        data.put("type", Contype.ListLobbies.ordinal());
         data.put("lobbies", lobbyList.toString());
         sendData(user, data);
     }

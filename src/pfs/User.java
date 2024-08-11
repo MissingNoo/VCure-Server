@@ -39,8 +39,7 @@ public class User implements Runnable {
                             json = new JSONObject("{type : 99, playername : \"-1\", playerid : \"-1\"}");
                         }
                         if (!json.get("playername").toString().equals(playername) && !playername.isEmpty()) {
-                            Server.removeClient(this);
-                            throw new RuntimeException("Invalid Credentials");
+                            json.put("type", Server.Contype.Disconnect.ordinal());
                         }
                         switch (getMessageContype(Integer.parseInt(json.get("type").toString()))) {
                             case Register:
@@ -73,22 +72,29 @@ public class User implements Runnable {
                             case ListLobbies:
                                 Server.listLobbies(this);
                                 break;
+                            case Disconnect:
+                                connected = false;
+                                System.out.println(Server.getTimeStamp() + "Player " + playername + "/" + channel.socket().getInetAddress().toString() + " has disconnected.");
+                                Server.removeClient(this);
+                                try {
+                                    channel.close();
+                                } catch (IOException ex1) {
+                                    System.out.println(ex1.getMessage());
+                                }
+                                break;
                             default:
                                 break;
                         }
                         if (senddata.optInt("type") != 0) {
-                            //System.out.println(Server.getTimeStamp() + "Sending: " + senddata);
+                            System.out.println(Server.getTimeStamp() + "Sending: " + senddata);
                             Server.sendData(this, senddata);
                         }
-                    }catch (RuntimeException r) {
-                        break;
                     }catch (Exception err){
                         System.out.println(err.getMessage());
                     }
                 }
             } catch (IOException ex) {
-                //ex.printStackTrace();
-                System.out.println(channel.socket().getInetAddress().toString() + " has disconnected.");
+                System.out.println(Server.getTimeStamp() + channel.socket().getInetAddress().toString() + " has disconnected.");
                 connected = false;
                 Server.removeClient(this);
                 try {
@@ -109,6 +115,7 @@ public class User implements Runnable {
             case 4 -> Server.Contype.CreateLobby;
             case 5 -> Server.Contype.JoinLobby;
             case 6 -> Server.Contype.ListLobbies;
+            case 7 -> Server.Contype.Disconnect;
         };
     }
 }
