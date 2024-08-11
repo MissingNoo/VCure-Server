@@ -16,6 +16,8 @@ public class User implements Runnable {
     public boolean is_host = false;
     public Lobby lobby;
     public int character = 0;
+    public int x = 0;
+    public int y = 0;
 
     public User(Server server, SocketChannel channel) {
         this.channel = channel;
@@ -94,6 +96,16 @@ public class User implements Runnable {
                                 character = json.getInt("character");
                                 lobby.updatePlayers();
                                 break;
+                            case StartGame:
+                                if (is_host) {
+                                    lobby.startGame();
+                                }
+                                break;
+                            case MovePlayer:
+                                x = json.getInt("x");
+                                y = json.getInt("y");
+                                lobby.updatePosition(this);
+                                break;
                             default:
                                 break;
                         }
@@ -131,6 +143,9 @@ public class User implements Runnable {
             case 8 -> Server.Contype.UpdatePlayers;
             case 9 -> Server.Contype.LeaveLobby;
             case 10 -> Server.Contype.SelectCharacter;
+            case 11 -> Server.Contype.IsHost;
+            case 12 -> Server.Contype.StartGame;
+            case 13 -> Server.Contype.MovePlayer;
         };
     }
 }

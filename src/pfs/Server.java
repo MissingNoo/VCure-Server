@@ -22,7 +22,10 @@ public class Server {
         Disconnect,
         UpdatePlayers,
         LeaveLobby,
-        SelectCharacter
+        SelectCharacter,
+        IsHost,
+        StartGame,
+        MovePlayer,
     }
 
     public static List<User> clients;

@@ -35,6 +35,7 @@ public class Lobby {
         System.out.println(Server.getTimeStamp() + user.playername + " left " + name);
         user.lobby = null;
         players.remove(user);
+        if(user.is_host && !players.isEmpty()) players.getFirst().is_host = true;
         updatePlayers();
         if (players.isEmpty()) {
             System.out.println(Server.getTimeStamp() + "Removing lobby " + name + " as it is empty");
@@ -57,10 +58,48 @@ public class Lobby {
             for (User player : players) {
                 senddata.put("type", Server.Contype.UpdatePlayers.ordinal());
                 senddata.put("players", Arrays.toString(playerdata));
+                JSONObject hostplayer = new JSONObject();
+                hostplayer.put("type", Server.Contype.IsHost.ordinal());
+                hostplayer.put("isHost", player.is_host);
                 Server.sendData(player, senddata);
+                Server.sendData(player, hostplayer);
             }
         } catch (JSONException e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    public void updatePosition(User user) {
+        JSONObject data = new JSONObject();
+        switch (players.indexOf(user)) {
+            case 0:
+                data.put("type", Server.Contype.MovePlayer.ordinal());
+                data.put("character", players.get(1).character);
+                data.put("x", players.get(1).x);
+                data.put("y", players.get(1).y);
+                Server.sendData(players.get(0), data);
+                break;
+            case 1:
+                data.put("type", Server.Contype.MovePlayer.ordinal());
+                data.put("character", players.get(0).character);
+                data.put("x", players.get(0).x);
+                data.put("y", players.get(0).y);
+                Server.sendData(players.get(1), data);
+                break;
+        }
+
+        for (User player : players) {
+            if (player != user) {
+
+            }
+        }
+    }
+
+    public void startGame() {
+        for (User player : players) {
+            JSONObject senddata = new JSONObject();
+            senddata.put("type", Server.Contype.StartGame.ordinal());
+            Server.sendData(player, senddata);
         }
     }
 }
