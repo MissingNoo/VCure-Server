@@ -15,6 +15,7 @@ public class User implements Runnable {
     public int playerid;
     public boolean is_host = false;
     public Lobby lobby;
+    public int character = 0;
 
     public User(Server server, SocketChannel channel) {
         this.channel = channel;
@@ -83,7 +84,15 @@ public class User implements Runnable {
                                 }
                                 break;
                             case UpdatePlayers:
-                                    lobby.updatePlayers();
+                                lobby.updatePlayers();
+                                break;
+                            case LeaveLobby:
+                                lobby.delPlayer(this);
+                                senddata.put("type", Server.Contype.LeaveLobby.ordinal());
+                                break;
+                            case SelectCharacter:
+                                character = json.getInt("character");
+                                lobby.updatePlayers();
                                 break;
                             default:
                                 break;
@@ -120,6 +129,8 @@ public class User implements Runnable {
             case 6 -> Server.Contype.ListLobbies;
             case 7 -> Server.Contype.Disconnect;
             case 8 -> Server.Contype.UpdatePlayers;
+            case 9 -> Server.Contype.LeaveLobby;
+            case 10 -> Server.Contype.SelectCharacter;
         };
     }
 }

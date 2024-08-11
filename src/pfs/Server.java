@@ -20,7 +20,9 @@ public class Server {
         JoinLobby,
         ListLobbies,
         Disconnect,
-        UpdatePlayers
+        UpdatePlayers,
+        LeaveLobby,
+        SelectCharacter
     }
 
     public static List<User> clients;
@@ -97,7 +99,7 @@ public class Server {
 
     public static void joinLobby(User user, String name, String password) {
         for (Lobby lobby : lobbies) {
-            if (lobby.name.equals(name)) {
+            if (lobby.name.equals(name) && lobby.password.equals(password)) {
                 user.lobby = lobby;
                 lobby.addPlayer(user);
                 break;

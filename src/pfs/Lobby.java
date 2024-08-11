@@ -33,6 +33,7 @@ public class Lobby {
 
     public void delPlayer(User user) {
         System.out.println(Server.getTimeStamp() + user.playername + " left " + name);
+        user.lobby = null;
         players.remove(user);
         updatePlayers();
         if (players.isEmpty()) {
@@ -48,6 +49,7 @@ public class Lobby {
             for (int i = 0; i < players.size(); i++) {
                 JSONObject current_player = new JSONObject();
                 current_player.put("name", players.get(i).playername);
+                current_player.put("character", players.get(i).character);
                 current_player.put("host", players.get(i).is_host);
                 playerdata[i] = current_player.toString();
             }
