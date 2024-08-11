@@ -26,6 +26,7 @@ public class Server {
         IsHost,
         StartGame,
         MovePlayer,
+        SpawnUpgrade
     }
 
     public static List<User> clients;

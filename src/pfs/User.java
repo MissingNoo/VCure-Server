@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static pfs.Server.*;
+
 @SuppressWarnings("unused")
 public class User implements Runnable {
     public SocketChannel channel;
@@ -42,17 +45,17 @@ public class User implements Runnable {
                             json = new JSONObject("{type : 99, playername : \"-1\", playerid : \"-1\"}");
                         }
                         if (!json.get("playername").toString().equals(playername) && !playername.isEmpty()) {
-                            json.put("type", Server.Contype.Disconnect.ordinal());
+                            json.put("type", Contype.Disconnect.ordinal());
                         }
                         switch (getMessageContype(Integer.parseInt(json.get("type").toString()))) {
                             case Register:
                                 String id = ConexaoMySQL.register(json.get("playername").toString());
-                                senddata.put("type", Server.Contype.Register.ordinal());
+                                senddata.put("type", Contype.Register.ordinal());
                                 senddata.put("id", id);
                                 break;
                             case Login:
                                 String dbname = ConexaoMySQL.login(json.getInt("playerid"));
-                                senddata.put("type", Server.Contype.Login.ordinal());
+                                senddata.put("type", Contype.Login.ordinal());
                                 if (json.getString("playername").equals(dbname)) {
                                     senddata.put("login", true);
                                     playername = dbname;
@@ -67,18 +70,18 @@ public class User implements Runnable {
                                 ConexaoMySQL.submitScore(this, json);
                                 break;
                             case CreateLobby:
-                                Server.createLobby(this, json.getString("name"), json.getString("password"));
+                                createLobby(this, json.getString("name"), json.getString("password"));
                                 break;
                             case JoinLobby:
-                                Server.joinLobby(this, json.getString("name"), json.getString("password"));
+                                joinLobby(this, json.getString("name"), json.getString("password"));
                                 break;
                             case ListLobbies:
-                                Server.listLobbies(this);
+                                listLobbies(this);
                                 break;
                             case Disconnect:
                                 connected = false;
-                                System.out.println(Server.getTimeStamp() + "Player " + playername + "/" + channel.socket().getInetAddress().toString() + " has disconnected.");
-                                Server.removeClient(this);
+                                System.out.println(getTimeStamp() + "Player " + playername + "/" + channel.socket().getInetAddress().toString() + " has disconnected.");
+                                removeClient(this);
                                 try {
                                     channel.close();
                                 } catch (IOException ex1) {
@@ -90,7 +93,7 @@ public class User implements Runnable {
                                 break;
                             case LeaveLobby:
                                 lobby.delPlayer(this);
-                                senddata.put("type", Server.Contype.LeaveLobby.ordinal());
+                                senddata.put("type", Contype.LeaveLobby.ordinal());
                                 break;
                             case SelectCharacter:
                                 character = json.getInt("character");
@@ -106,21 +109,24 @@ public class User implements Runnable {
                                 y = json.getInt("y");
                                 lobby.updatePosition(this);
                                 break;
+                            case SpawnUpgrade:
+                                lobby.spawnUpgrade(this, json.getInt("id"), json.getInt("level"), json.getString("updata"));
+                                break;
                             default:
                                 break;
                         }
                         if (senddata.optInt("type") != 0) {
-                            System.out.println(Server.getTimeStamp() + "Sending: " + senddata);
-                            Server.sendData(this, senddata);
+                            System.out.println(getTimeStamp() + "Sending: " + senddata);
+                            sendData(this, senddata);
                         }
                     }catch (Exception err){
                         System.out.println(err.getMessage());
                     }
                 }
             } catch (IOException ex) {
-                System.out.println(Server.getTimeStamp() + channel.socket().getInetAddress().toString() + " has disconnected.");
+                System.out.println(getTimeStamp() + channel.socket().getInetAddress().toString() + " has disconnected.");
                 connected = false;
-                Server.removeClient(this);
+                removeClient(this);
                 try {
                     channel.close();
                 } catch (IOException ex1) {
@@ -130,22 +136,23 @@ public class User implements Runnable {
         }
     }
 
-    private Server.Contype getMessageContype(int type){
+    private Contype getMessageContype(int type){
         return switch (type) {
-            default -> Server.Contype.Null;
-            case 1 -> Server.Contype.Register;
-            case 2 -> Server.Contype.Login;
-            case 3 -> Server.Contype.ScoreSubmit;
-            case 4 -> Server.Contype.CreateLobby;
-            case 5 -> Server.Contype.JoinLobby;
-            case 6 -> Server.Contype.ListLobbies;
-            case 7 -> Server.Contype.Disconnect;
-            case 8 -> Server.Contype.UpdatePlayers;
-            case 9 -> Server.Contype.LeaveLobby;
-            case 10 -> Server.Contype.SelectCharacter;
-            case 11 -> Server.Contype.IsHost;
-            case 12 -> Server.Contype.StartGame;
-            case 13 -> Server.Contype.MovePlayer;
+            default -> Contype.Null;
+            case 1 -> Contype.Register;
+            case 2 -> Contype.Login;
+            case 3 -> Contype.ScoreSubmit;
+            case 4 -> Contype.CreateLobby;
+            case 5 -> Contype.JoinLobby;
+            case 6 -> Contype.ListLobbies;
+            case 7 -> Contype.Disconnect;
+            case 8 -> Contype.UpdatePlayers;
+            case 9 -> Contype.LeaveLobby;
+            case 10 -> Contype.SelectCharacter;
+            case 11 -> Contype.IsHost;
+            case 12 -> Contype.StartGame;
+            case 13 -> Contype.MovePlayer;
+            case 14 -> Contype.SpawnUpgrade;
         };
     }
 }
