@@ -34,7 +34,7 @@ public class Server {
 
     public static List<User> clients;
     public static List<Lobby> lobbies;
-    public static SGui gui = new SGui();
+    //public static SGui gui = new SGui();
 
     public Server(int port) {
         Server.clients = new ArrayList<>();
@@ -150,12 +150,10 @@ public class Server {
     }
 
     public static void main(String... args) {
-        for (int i = 0; i < 30; i++) {
-            System.out.println();
-        }
         ConexaoMySQL.getConexaoMySQL();
         System.out.println(ConexaoMySQL.statusConection());
-        gui.setVisible(true);
+        //gui.setVisible(true);
+
         //noinspection InstantiationOfUtilityClass
         new Server(21319);
     }
