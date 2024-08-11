@@ -112,6 +112,12 @@ public class User implements Runnable {
                             case SpawnUpgrade:
                                 lobby.spawnUpgrade(this, json.getInt("id"), json.getInt("level"), json.getString("updata"));
                                 break;
+                            case SpawnEnemy:
+                                lobby.spawnEnemy(this, json.getString("enemyinfo"));
+                                break;
+                            case DestroyInstance:
+                                lobby.destroyInstance(this, json.getString("instancedata"));
+                                break;
                             default:
                                 break;
                         }
@@ -153,6 +159,8 @@ public class User implements Runnable {
             case 12 -> Contype.StartGame;
             case 13 -> Contype.MovePlayer;
             case 14 -> Contype.SpawnUpgrade;
+            case 15 -> Contype.SpawnEnemy;
+            case 16 -> Contype.DestroyInstance;
         };
     }
 }

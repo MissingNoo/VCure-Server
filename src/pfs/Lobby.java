@@ -102,4 +102,24 @@ public class Lobby {
             sendData(user, data);
         }
     }
+
+    public void spawnEnemy(User player, String enemydata) {
+        JSONObject data = new JSONObject();
+        data.put("type", Contype.SpawnEnemy.ordinal());
+        data.put("enemydata", enemydata);
+        for (User user : players) {
+            if (user == player) continue;
+            sendData(user, data);
+        }
+    }
+
+    public void destroyInstance(User player, String instancedata) {
+        JSONObject data = new JSONObject();
+        data.put("type", Contype.DestroyInstance.ordinal());
+        data.put("instancedata", instancedata);
+        for (User user : players) {
+            if (user == player) continue;
+            sendData(user, data);
+        }
+    }
 }

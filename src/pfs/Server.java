@@ -26,7 +26,9 @@ public class Server {
         IsHost,
         StartGame,
         MovePlayer,
-        SpawnUpgrade
+        SpawnUpgrade,
+        SpawnEnemy,
+        DestroyInstance,
     }
 
     public static List<User> clients;
