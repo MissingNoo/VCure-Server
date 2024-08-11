@@ -1,6 +1,7 @@
 package pfs;
 import org.json.JSONObject;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.*;
 import java.nio.channels.ServerSocketChannel;
@@ -33,6 +34,7 @@ public class Server {
 
     public static List<User> clients;
     public static List<Lobby> lobbies;
+    public static SGui gui = new SGui();
 
     public Server(int port) {
         Server.clients = new ArrayList<>();
@@ -153,6 +155,7 @@ public class Server {
         }
         ConexaoMySQL.getConexaoMySQL();
         System.out.println(ConexaoMySQL.statusConection());
+        gui.setVisible(true);
         //noinspection InstantiationOfUtilityClass
         new Server(21319);
     }

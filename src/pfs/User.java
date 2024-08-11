@@ -60,6 +60,7 @@ public class User implements Runnable {
                                     senddata.put("login", true);
                                     playername = dbname;
                                     playerid = json.getInt("playerid");
+                                    gui.addPlayer(this);
                                 }
                                 else {
                                     senddata.put("login", false);
