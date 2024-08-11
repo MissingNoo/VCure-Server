@@ -19,7 +19,8 @@ public class Server {
         CreateLobby,
         JoinLobby,
         ListLobbies,
-        Disconnect
+        Disconnect,
+        UpdatePlayers
     }
 
     public static List<User> clients;
@@ -109,7 +110,7 @@ public class Server {
         for (Lobby lobby : lobbies) {
             JSONObject lobbyinfo = new JSONObject();
             lobbyinfo.put("name", lobby.name);
-            lobbyinfo.put("protected", lobby.password.isEmpty());
+            lobbyinfo.put("protected", !lobby.password.isEmpty());
             lobbyinfo.put("totalplayers", lobby.players.size());
             lobbyList.add(lobbyinfo.toString());
         }

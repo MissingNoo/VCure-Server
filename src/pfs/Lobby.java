@@ -19,13 +19,32 @@ public class Lobby {
     }
 
     public void addPlayer(User user) {
-        System.out.println(Server.getTimeStamp() + user.playername + " joined " + name);
-        user.lobby = this;
-        JSONObject senddata = new JSONObject();
-        try {
+        if (!players.contains(user)) {
+            System.out.println(Server.getTimeStamp() + user.playername + " joined " + name);
             user.is_host = players.isEmpty();
-            if (!players.contains(user)) players.add(user);
-            String[] playerdata = {"", ""};
+            players.add(user);
+            user.lobby = this;
+            JSONObject senddata = new JSONObject();
+            senddata.put("type", Server.Contype.JoinLobby.ordinal());
+            Server.sendData(user, senddata);
+            updatePlayers();
+        }
+    }
+
+    public void delPlayer(User user) {
+        System.out.println(Server.getTimeStamp() + user.playername + " left " + name);
+        players.remove(user);
+        updatePlayers();
+        if (players.isEmpty()) {
+            System.out.println(Server.getTimeStamp() + "Removing lobby " + name + " as it is empty");
+            Server.delLobby(this);
+        }
+    }
+
+    public void updatePlayers(){
+        JSONObject senddata = new JSONObject();
+        String[] playerdata = {"", ""};
+        try {
             for (int i = 0; i < players.size(); i++) {
                 JSONObject current_player = new JSONObject();
                 current_player.put("name", players.get(i).playername);
@@ -34,21 +53,12 @@ public class Lobby {
             }
 
             for (User player : players) {
-                senddata.put("type", 5);
+                senddata.put("type", Server.Contype.UpdatePlayers.ordinal());
                 senddata.put("players", Arrays.toString(playerdata));
                 Server.sendData(player, senddata);
             }
         } catch (JSONException e) {
             System.out.println(e.getMessage());
-        }
-    }
-
-    public void delPlayer(User user) {
-        System.out.println(Server.getTimeStamp() + user.playername + " left " + name);
-        players.remove(user);
-        if (players.isEmpty()) {
-            System.out.println(Server.getTimeStamp() + "Removing lobby " + name + " as it is empty");
-            Server.delLobby(this);
         }
     }
 }

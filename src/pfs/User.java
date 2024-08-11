@@ -82,6 +82,9 @@ public class User implements Runnable {
                                     System.out.println(ex1.getMessage());
                                 }
                                 break;
+                            case UpdatePlayers:
+                                    lobby.updatePlayers();
+                                break;
                             default:
                                 break;
                         }
@@ -116,6 +119,7 @@ public class User implements Runnable {
             case 5 -> Server.Contype.JoinLobby;
             case 6 -> Server.Contype.ListLobbies;
             case 7 -> Server.Contype.Disconnect;
+            case 8 -> Server.Contype.UpdatePlayers;
         };
     }
 }
