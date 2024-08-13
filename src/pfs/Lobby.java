@@ -84,6 +84,7 @@ public class Lobby {
     }
 
     public void startGame() {
+        System.out.println("Lobby " + name + " is starting");
         for (User player : players) {
             JSONObject senddata = new JSONObject();
             senddata.put("type", Contype.StartGame.ordinal());
