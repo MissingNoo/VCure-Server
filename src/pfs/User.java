@@ -119,6 +119,10 @@ public class User implements Runnable {
                             case DestroyInstance:
                                 lobby.destroyInstance(this, json.getString("instancedata"));
                                 break;
+                            case GetScores:
+                                senddata = ConexaoMySQL.getScores(json.getString("character"),json.getInt("page") );
+                                senddata.put("type", Contype.GetScores.ordinal());
+                                break;
                             default:
                                 break;
                         }
@@ -162,6 +166,7 @@ public class User implements Runnable {
             case 14 -> Contype.SpawnUpgrade;
             case 15 -> Contype.SpawnEnemy;
             case 16 -> Contype.DestroyInstance;
+            case 17 -> Contype.GetScores;
         };
     }
 }

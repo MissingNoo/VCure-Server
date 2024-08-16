@@ -29,6 +29,7 @@ public class Server {
         SpawnUpgrade,
         SpawnEnemy,
         DestroyInstance,
+        GetScores
     }
 
     public static List<User> clients;
@@ -154,6 +155,7 @@ public class Server {
         //gui.setVisible(true);
 
         //noinspection InstantiationOfUtilityClass
+
         new Server(21319);
     }
 

@@ -101,20 +101,22 @@ public class ConexaoMySQL {
             }
         }
         catch (SQLException ex){
-            System.out.println(ex);
+            System.out.println(ex.getMessage());
         }
         return nickname;
     }
 
     public static void submitScore(User user, JSONObject scoredata) {
         try {
-            String query = "INSERT INTO leaderboards (playerid, score, build, time)"
-                    + "VALUES (?, ?, ?, ?)";
+            String query = "INSERT INTO leaderboards (playerid, ch, score, build, date, time)"
+                    + "VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement preparedStmt = connection.prepareStatement(query);
             preparedStmt.setInt (1, user.playerid);
+            preparedStmt.setString (3, scoredata.getString("ch"));
             preparedStmt.setString (2, scoredata.getBigDecimal("score").toString());
             preparedStmt.setString (3, scoredata.getString("build"));
             preparedStmt.setString (4, scoredata.getString("date"));
+            preparedStmt.setString (4, scoredata.getString("time"));
             preparedStmt.execute();
             System.out.println("New score received from " + user.playername);
         }
@@ -122,5 +124,28 @@ public class ConexaoMySQL {
             System.err.println("Got an exception!");
             System.err.println(err.getMessage());
         }
+    }
+
+    public static JSONObject getScores(String character, int page) {
+        JSONObject result = new JSONObject();
+        String query = "SELECT * FROM leaderboards WHERE ch = '" + character + "' ORDER BY score LIMIT 10";
+        try (Statement stmt = connection.createStatement()) {
+            ResultSet rs = stmt.executeQuery(query);
+            int i = 0;
+            while (rs.next()) {
+                JSONObject current = new JSONObject();
+                current.put("score", rs.getInt("score"));
+                current.put("id", rs.getInt("id"));
+                current.put("date", rs.getString("date"));
+                current.put("time", rs.getString("time"));
+                result.put("r" + String.valueOf(i), current.toString());
+                i++;
+            }
+        }
+        catch (SQLException ex){
+            result.put("error", "error");
+            System.out.println(ex.getMessage());
+        }
+        return result;
     }
 }
